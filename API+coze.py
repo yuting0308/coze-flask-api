@@ -38,3 +38,7 @@ def log_discomfort():
         return jsonify({"status": "success", "message": "資料已成功寫入 Google Sheets"}), 200
     except Exception as e:
         return jsonify({"status": "error", "message": str(e)}), 500
+
+if __name__ == '__main__':
+    port = int(os.environ.get('PORT', 5000))
+    app.run(host='0.0.0.0', port=port)
