@@ -1,3 +1,5 @@
+import json
+import os
 from flask import Flask, request, jsonify
 import gspread
 from oauth2client.service_account import ServiceAccountCredentials
@@ -8,7 +10,12 @@ app = Flask(__name__)
 
 # Google Sheets 設定
 scope = ['https://spreadsheets.google.com/feeds', 'https://www.googleapis.com/auth/drive']
-creds = ServiceAccountCredentials.from_json_keyfile_name('yujichuqing-119.json', scope)
+creds_json = os.environ.get('GOOGLE_CREDENTIALS')
+if creds_json is None:
+    raise ValueError("環境變數 GOOGLE_CREDENTIALS 未設定")
+
+creds_dict = json.loads(creds_json)
+creds = ServiceAccountCredentials.from_json_keyfile_dict(creds_dict, scope)
 client = gspread.authorize(creds)
 spreadsheet = client.open('同行者心知AI用戶資料庫')
 worksheet = spreadsheet.sheet1
@@ -24,7 +31,6 @@ def log_discomfort():
         note = data.get('note', '')
         tz = timezone('Asia/Taipei')
         timestamp = datetime.now(tz).strftime('%Y-%m-%d %H:%M:%S')
-
 
         row = [user_id, timestamp, description, category, sub_category, note]
         worksheet.append_row(row)
